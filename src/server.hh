@@ -11,6 +11,8 @@
 #include <vector>
 #include <unistd.h>
 #include <poll.h>
+#include <thread>
+#include <mutex>
 
 class Server {
 public:
@@ -22,6 +24,7 @@ public:
 	void handleConnection(int connection);
 	
 	void addMessage(const char* msg);
+	void setLogToBuffer();
 
 	const std::vector<std::string>& getMessageLog() const { return _message_log; }
 
@@ -30,4 +33,5 @@ private:
 	std::vector<std::string> _message_log;
 	sockaddr_in _sockaddr;
 	int _sockfd;
+	std::mutex _connections_mutex;
 };

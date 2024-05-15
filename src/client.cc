@@ -10,22 +10,27 @@
 #include <string>
 #include <thread>
 
+#include "logger.hh"
+
 int Client::connectToServer(const char* ip, const char* port){
 	sockaddr_in serv_addr = { 0 };
 	serv_addr.sin_family = AF_INET;
 	serv_addr.sin_port = htons((int)strtol(port, nullptr, 10));
 	if (inet_pton(AF_INET, ip, &serv_addr.sin_addr) <= 0){
 		fprintf(stderr, "Error: pton error\n");
+		Logger::log("Error: pton error\n");
 		return -1;
 	}
 	
 	if ( (_sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0){
 		fprintf(stderr, "Error: Failed to create socket\n");
+		Logger::log("Error: Failed to create socket\n");
 		return -1;
 	}
 
 	if ( connect(_sockfd, (struct sockaddr *)& serv_addr, sizeof(serv_addr)) < 0){
 		fprintf(stderr, "Error: Connection failed.\n");
+		Logger::log("Error: Connection failed.\n");
 		return -1;
 	}
 	return 0;
@@ -55,7 +60,7 @@ void Client::readServer(){
 	}
 
 	if (n < 0)
-		printf("\nRead error\n");
+		Logger::log("Read Error\n");
 }
 
 void Client::sendMessage(){

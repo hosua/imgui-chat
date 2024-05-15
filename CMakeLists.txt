@@ -28,6 +28,7 @@ add_executable(${PROJECT_NAME}
 	src/main.cc
 	src/client.cc
 	src/server.cc
+	src/logger.cc
 )
 
 # Include Directories

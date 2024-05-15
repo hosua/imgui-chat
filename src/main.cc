@@ -17,6 +17,7 @@
 
 #include "client.hh"
 #include "server.hh"
+#include "logger.hh"
 
 #include <memory>
 #include <iostream>
@@ -98,15 +99,14 @@ int main(int, char**)
 	bool show_another_window = false;
 	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
-	static char client_ip_buffer[25] = { '1', '2', '7', '.', '0', '.', '0', '.', '1' };
-	static char client_port_buffer[6] = { '8', '9', '6', '9' };
 	static char server_ip_buffer[25] = { '1', '2', '7', '.', '0', '.', '0', '.', '1' };
 	static char server_port_buffer[6] = { '8', '9', '6', '9' };
-	static char client_buffer[2048] = { 0 };
 	static char server_buffer[4096] = { 0 };
 
 	// Main loop
 	bool done = false;
+
+	Logger::log("Test\n");
 
 	while (!done)
 	{
@@ -142,14 +142,56 @@ int main(int, char**)
 
 		// Client GUI
 		{
+			static char client_ip_buffer[25] = { '1', '2', '7', '.', '0', '.', '0', '.', '1' };
+			static char client_port_buffer[6] = { '8', '9', '6', '9' };
+			static char client_buffer[2048] = { 0 };
 			static ImGuiInputTextFlags chat_flags = ImGuiInputTextFlags_AllowTabInput 
 				| ImGuiInputTextFlags_CtrlEnterForNewLine
 				| ImGuiInputTextFlags_EscapeClearsAll
 				| ImGuiInputTextFlags_EnterReturnsTrue;
 
-			ImGui::Begin("Chat Application");                         
+			ImGui::Begin("Chat #1");                         
 			ImGui::Text("Welcome, user!");               // Display some text (you can use a format strings too)
-														 //
+			
+			if (ImGui::InputTextMultiline("##source", client_buffer, IM_ARRAYSIZE(client_buffer), 
+					ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 16), chat_flags) ||
+				ImGui::Button("Send") ){
+				std::cout << Logger::getTimeStamp() << "Sending message\n";
+				if (!s_client){
+					strcat(client_buffer, "You need to connect to a server first!\n");
+				} else if (strnlen(client_buffer, 2048) > 0){
+					s_client->sendMessage();
+					memset(client_buffer, 0, 2048);
+					s_client = std::make_unique<Client>(client_ip_buffer, client_port_buffer, client_buffer);
+				}
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("Connect")){
+				std::cout << Logger::getTimeStamp() << "Connecting to server...\n";
+				if (!s_client)
+					s_client = std::make_unique<Client>(client_ip_buffer, client_port_buffer, client_buffer);
+			}
+
+			ImGui::InputText("IP", client_ip_buffer, IM_ARRAYSIZE(client_ip_buffer), ImGuiInputTextFlags_AllowTabInput | ImGuiInputTextFlags_CharsDecimal);
+			ImGui::InputText("Port", client_port_buffer, IM_ARRAYSIZE(client_port_buffer), ImGuiInputTextFlags_AllowTabInput | ImGuiInputTextFlags_CharsDecimal);
+
+			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+			ImGui::End();
+		}
+
+		// Client GUI
+		{
+			static char client_ip_buffer[25] = { '1', '2', '7', '.', '0', '.', '0', '.', '1' };
+			static char client_port_buffer[6] = { '8', '9', '6', '9' };
+			static char client_buffer[2048] = { 0 };
+			static ImGuiInputTextFlags chat_flags = ImGuiInputTextFlags_AllowTabInput 
+				| ImGuiInputTextFlags_CtrlEnterForNewLine
+				| ImGuiInputTextFlags_EscapeClearsAll
+				| ImGuiInputTextFlags_EnterReturnsTrue;
+
+			ImGui::Begin("Chat #2");                         
+			ImGui::Text("Welcome, user!");               // Display some text (you can use a format strings too)
+			
 			if (ImGui::InputTextMultiline("##source", client_buffer, IM_ARRAYSIZE(client_buffer), 
 					ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 16), chat_flags) ||
 				ImGui::Button("Send") ){
@@ -175,6 +217,7 @@ int main(int, char**)
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
 			ImGui::End();
 		}
+
 
 		// Server GUI 
 		{
