@@ -23,10 +23,6 @@ public:
 	
 	void addMessage(const char* msg);
 
-	int getListenerSocket(void);
-	void addToPfds(std::vector<pollfd> pfds, int newfd, int& fd_count, int& fd_size);
-	void delFromPfds(std::vector<pollfd> pfds, int i, int& fd_count);
-
 	const std::vector<std::string>& getMessageLog() const { return _message_log; }
 
 private:
