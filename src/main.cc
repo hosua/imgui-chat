@@ -144,13 +144,15 @@ int main(int, char**)
 		{
 			static ImGuiInputTextFlags chat_flags = ImGuiInputTextFlags_AllowTabInput 
 				| ImGuiInputTextFlags_CtrlEnterForNewLine
-				| ImGuiInputTextFlags_EscapeClearsAll;
+				| ImGuiInputTextFlags_EscapeClearsAll
+				| ImGuiInputTextFlags_EnterReturnsTrue;
 
 			ImGui::Begin("Chat Application");                         
 			ImGui::Text("Welcome, user!");               // Display some text (you can use a format strings too)
 														 //
-			ImGui::InputTextMultiline("##source", client_buffer, IM_ARRAYSIZE(client_buffer), ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 16), chat_flags);
-			if (ImGui::Button("Send") || (ImGui::IsItemFocused() && ImGui::IsKeyPressed(ImGuiKey_Enter))){
+			if (ImGui::InputTextMultiline("##source", client_buffer, IM_ARRAYSIZE(client_buffer), 
+					ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 16), chat_flags) ||
+				ImGui::Button("Send") ){
 				std::cout << "Sending message\n";
 				if (!s_client){
 					strcat(client_buffer, "You need to connect to a server first!\n");
